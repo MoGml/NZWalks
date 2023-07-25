@@ -1,10 +1,7 @@
-﻿using System.Globalization;
-
-namespace API.Models.Domain
+﻿namespace API.Models.DTO
 {
-    public class Walk
+    public class NewWalkDto
     {
-        public Guid Id { get; set; }
 
         public string Name { get; set; }
 
@@ -18,8 +15,5 @@ namespace API.Models.Domain
 
         public Guid DifficultyId { get; set; }
 
-        public Region Region { get; set; }
-
-        public Difficulty Difficulty { get; set; }
     }
 }
