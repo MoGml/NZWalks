@@ -26,9 +26,16 @@ namespace API.Controllers
         /// </summary>
         /// <returns>List of WalksDto</returns>
         [HttpGet]
-        public async Task<ActionResult<List<WalkDTO>>> GetAllWalks()
+        public async Task<ActionResult<List<WalkDTO>>> GetAllWalks(
+            [FromQuery] string? FilterOn, [FromQuery] string? QueryTerm,
+            [FromQuery] string? SortBy, [FromQuery] bool IsAsscending = true,
+            [FromQuery] int PageIndex = 1, [FromQuery] int PageSize = 10)
         {
-            return _mapper.Map<List<WalkDTO>>( await _walkRepository.GetWalkListAsync());
+            return _mapper.Map<List<WalkDTO>>( await _walkRepository.GetWalkListAsync(
+                FilterOn, QueryTerm, 
+                SortBy, IsAsscending, 
+                PageIndex, PageSize
+                ));
         }
 
 

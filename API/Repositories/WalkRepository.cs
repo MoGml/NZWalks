@@ -3,6 +3,7 @@ using API.Models.Domain;
 using API.Models.DTO;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Walk = API.Models.Domain.Walk;
 
 namespace API.Repositories
@@ -15,11 +16,46 @@ namespace API.Repositories
         {
             _context = context;
         }
-        public async Task<List<Walk>> GetWalkListAsync()
+        public async Task<List<Walk>> GetWalkListAsync(
+            string? FilterOn, string? QueryTerm, 
+            string? SortBy, bool IsAsscending, 
+            int PageIndex, int PageSize)
         {
-            return await _context.Walks
+            var walks = _context.Walks
                 .Include(w => w.Difficulty)
                 .Include(w => w.Region)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(FilterOn) && !string.IsNullOrEmpty(QueryTerm))
+            {
+                if (FilterOn.ToLower() == "name")
+                {
+                    walks = walks.Where(w => w.Name.Contains(QueryTerm));
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(SortBy))
+            {
+                if(SortBy.ToLower() == "name")
+                {
+                    walks = IsAsscending ? walks.OrderBy(w => w.Name) : walks.OrderByDescending(w => w.Name);
+                }
+                
+                if(SortBy.ToLower() == "length")
+                {
+                    walks = IsAsscending ? walks.OrderBy(w => w.LengthInKm) : walks.OrderByDescending(w => w.LengthInKm);
+                }
+            }
+
+            var count = walks.Count();
+
+            var skip = (PageIndex - 1) * PageSize;
+
+            var remaining = count - skip;
+
+            return await walks
+                .Skip(skip)
+                .Take(PageSize > remaining ? remaining : PageSize)
                 .ToListAsync();
         }
 
